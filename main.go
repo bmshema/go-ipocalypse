@@ -8,10 +8,8 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
-	"os/signal"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -41,10 +39,10 @@ func main() {
 	fmt.Println("Setting up network configuration...")
 	var setupCmd *exec.Cmd
 	if enableInternet {
-		setupCmd = exec.Command("sudo", "./setup_network.sh", "-i")
+		setupCmd = exec.Command("sudo", "utils/setup_network.sh", "-i")
 		fmt.Println("Internet access enabled for containers")
 	} else {
-		setupCmd = exec.Command("sudo", "./setup_network.sh")
+		setupCmd = exec.Command("sudo", "utils/setup_network.sh")
 		fmt.Println("Internet access disabled for containers")
 	}
 	setupCmd.Stdout = os.Stdout
@@ -53,21 +51,6 @@ func main() {
 		fmt.Printf("Failed to setup network: %v\n", err)
 		os.Exit(1)
 	}
-
-	// Setup cleanup on interrupt
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sigChan
-		fmt.Println("\nCleaning up network configuration...")
-		cleanupCmd := exec.Command("sudo", "./cleanup_network.sh")
-		cleanupCmd.Stdout = os.Stdout
-		cleanupCmd.Stderr = os.Stderr
-		if err := cleanupCmd.Run(); err != nil {
-			fmt.Printf("Failed to cleanup network: %v\n", err)
-		}
-		os.Exit(0)
-	}()
 
 	// Continue with your existing container setup logic...
 	dockerfileList := strings.Split(dockerfileDirs, ",")
