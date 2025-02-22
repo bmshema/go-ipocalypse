@@ -38,6 +38,28 @@ sudo ./ipocalypse
 \
 `ipocalypse_basic_image` has no functionality beyond connecting to the local network. Add your own custom Dockerfiles to additional directories to deploy containers with other workloads. Additional directories must start with `ipocalypse_` to be discovered. Example: `ipocalypse_<name_of_workload>`.
 
+## Network Configuration
+
+ipocalypse will:
+1. Create a Docker macvlan network "ipocalypse_net"
+2. Set up a host macvlan interface for container communication
+3. Configure NAT if internet access is enabled
+4. Launch containers using images from all ipocalypse* directories until ip addresses are exhausted
+
+## Cleanup
+To stop all running containers:
+```bash
+docker stop $(docker ps -a -q)
+```
+To remove all containers:
+```bash
+docker rm $(docker ps -a -q)
+```
+
+To clean up the network configuration:
+```bash
+sudo utils/cleanup_network.sh
+```
 ## Creating Custom Images
 
 1. Create a new directory starting with "ipocalypse"
@@ -50,22 +72,6 @@ ipocalypse_basic_image/
 ├── Dockerfile
 └── entrypoint.sh
 ```
-
-## Network Configuration
-
-ipocalypse will:
-1. Create a Docker macvlan network "ipocalypse_net"
-2. Set up a host macvlan interface for container communication
-3. Configure NAT if internet access is enabled
-4. Launch containers using images from all ipocalypse* directories until ip addresses are exhausted
-
-## Cleanup
-
-To clean up the network configuration:
-```bash
-sudo utils/cleanup_network.sh
-```
-
 ## Container DCHP Setup:
 The `entrypoint.sh` for the ipocalypse_basic_image ensures each container properly joins the network and maintains its network connection by handling: 
 
