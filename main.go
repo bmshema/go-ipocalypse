@@ -21,6 +21,37 @@ import (
 )
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, `
+ipocalypse - A tool for testing network behavior by deploying 
+multiple containers with DHCP-assigned IP addresses in a shared 
+network space.
+
+Usage:
+  sudo ./ipocalypse [options]
+
+Options:
+  -dockerfiles string
+        Comma-separated list of directories containing Dockerfiles
+        Auto-discovers all ipocalypse_* directories if not specified
+
+  -workers int
+        Number of concurrent container launch workers (default: 5)
+
+  -internet
+        Enable internet access for containers (default: false)
+
+Examples:
+  Auto-discover and use all ipocalypse directories:
+    sudo ./ipocalypse
+
+  Use specific directories with internet access:
+    sudo ./ipocalypse -dockerfiles=ipocalypse_basic_image,ipocalypse_custom -internet
+
+  Launch with more workers:
+    sudo ./ipocalypse -workers=8
+`)
+	}
 	// Flags for Docker image building and container launching
 	var dockerfileDirs string
 	var workers int
