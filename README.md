@@ -67,7 +67,7 @@ sudo utils/cleanup_network.sh
 ```
 
 ## Container DCHP Setup:
-The `entrypoint.sh` for the basic image contains the functionality for:
+The `entrypoint.sh` for the ipocalypse_basic_image ensures each container properly joins the network and maintains its network connection by handling: 
 
 **1. Network Setup:**
 - Detects and configures the container's network interface
@@ -82,6 +82,6 @@ The `entrypoint.sh` for the basic image contains the functionality for:
 **3. Error Handling:**
 - Provides detailed debugging output
 - Gracefully handles failures in interface detection or DHCP
-- Implements proper signal handling for clean container shutdown
+- Implements proper signal handling for clean container shutdown  
 
-The script ensures each container properly joins the network and maintains its network connection. Configure functionality for other containers by copying this script to new Dockerfile directories and modifying the script as needed.
+Configure functionality for other container images by copying this script to new ipocalypse_* Dockerfile directories and modifying the script as needed.
