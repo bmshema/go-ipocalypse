@@ -56,10 +56,10 @@ func main() {
 	fmt.Println("Setting up network configuration...")
 	var setupCmd *exec.Cmd
 	if enableInternet {
-		setupCmd = exec.Command("sudo", "./setup_network.sh", "-i")
+		setupCmd = exec.Command("sudo", "utils/setup_network.sh", "-i")
 		fmt.Println("Internet access enabled for containers")
 	} else {
-		setupCmd = exec.Command("sudo", "./setup_network.sh")
+		setupCmd = exec.Command("sudo", "utils/setup_network.sh")
 		fmt.Println("Internet access disabled for containers")
 	}
 	setupCmd.Stdout = os.Stdout
