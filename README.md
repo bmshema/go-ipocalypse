@@ -67,7 +67,7 @@ sudo utils/cleanup_network.sh
 ```
 
 ## Container DCHP Setup:
-The `entrypoint.sh the basic image contains the functionality for:
+The `entrypoint.sh` for the basic image contains the functionality for:
 
 **1. Network Setup:**
 - Detects and configures the container's network interface
