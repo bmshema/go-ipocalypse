@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -25,24 +26,40 @@ func main() {
 	var workers int
 	var enableInternet bool
 
-	flag.StringVar(&dockerfileDirs, "dockerfiles", "", "Comma-separated list of directories containing Dockerfiles")
+	flag.StringVar(&dockerfileDirs, "dockerfiles", "", "Optional: Comma-separated list of directories containing Dockerfiles (must start with 'ipocalypse')")
 	flag.IntVar(&workers, "workers", 5, "Number of concurrent container launch workers")
 	flag.BoolVar(&enableInternet, "internet", false, "Enable internet access for containers")
 	flag.Parse()
 
+	var dockerfileList []string
 	if dockerfileDirs == "" {
-		fmt.Println("Provide at least one Dockerfile directory using the -dockerfiles flag")
-		os.Exit(1)
+		// Auto-discover directories
+		dirs, err := getIpocalypseDirs()
+		if err != nil {
+			fmt.Printf("Error discovering directories: %v\n", err)
+			os.Exit(1)
+		}
+		dockerfileList = dirs
+	} else {
+		// Use provided directories
+		dockerfileList = strings.Split(dockerfileDirs, ",")
+		// Validate directory names
+		for _, dir := range dockerfileList {
+			if !strings.HasPrefix(filepath.Base(dir), "ipocalypse") {
+				fmt.Printf("Error: Directory '%s' must start with 'ipocalypse'\n", dir)
+				os.Exit(1)
+			}
+		}
 	}
 
 	// Execute setup_network.sh with internet flag if enabled
 	fmt.Println("Setting up network configuration...")
 	var setupCmd *exec.Cmd
 	if enableInternet {
-		setupCmd = exec.Command("sudo", "utils/setup_network.sh", "-i")
+		setupCmd = exec.Command("sudo", "./setup_network.sh", "-i")
 		fmt.Println("Internet access enabled for containers")
 	} else {
-		setupCmd = exec.Command("sudo", "utils/setup_network.sh")
+		setupCmd = exec.Command("sudo", "./setup_network.sh")
 		fmt.Println("Internet access disabled for containers")
 	}
 	setupCmd.Stdout = os.Stdout
@@ -53,7 +70,6 @@ func main() {
 	}
 
 	// Continue with your existing container setup logic...
-	dockerfileList := strings.Split(dockerfileDirs, ",")
 	fmt.Printf("Processing %d Dockerfile directories with %d workers\n", len(dockerfileList), workers)
 
 	// Create a Docker client.
@@ -63,10 +79,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Build images from each provided Dockerfile directory.
+	// Build images using directory names
 	imageNames := make([]string, 0, len(dockerfileList))
-	for i, dir := range dockerfileList {
-		imageName := fmt.Sprintf("ipocalypse_%d:latest", i)
+	for _, dir := range dockerfileList {
+		// Use the directory name as the image name
+		imageName := fmt.Sprintf("%s:latest", filepath.Base(dir))
 		fmt.Printf("Building image %s from directory %s\n", imageName, dir)
 		if err = buildImage(cli, dir, imageName); err != nil {
 			fmt.Printf("[ERROR] Building image from %s failed: %v\n", dir, err)
@@ -235,4 +252,23 @@ func setupHostMacvlanInterface(parent, ipWithCIDR, dockerSubnet string) error {
 	}
 
 	return nil
+}
+
+func getIpocalypseDirs() ([]string, error) {
+	var dirs []string
+	entries, err := os.ReadDir(".")
+	if err != nil {
+		return nil, err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() && strings.HasPrefix(entry.Name(), "ipocalypse") {
+			dirs = append(dirs, "./"+entry.Name())
+		}
+	}
+
+	if len(dirs) == 0 {
+		return nil, fmt.Errorf("no directories starting with 'ipocalypse' found")
+	}
+	return dirs, nil
 }
