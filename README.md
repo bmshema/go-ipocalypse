@@ -38,6 +38,11 @@ sudo ./ipocalypse
 \
 `ipocalypse_basic_image` has no functionality beyond connecting to the local network. Add your own custom Dockerfiles to additional directories to deploy containers with other workloads. Additional directories must start with `ipocalypse_` to be discovered. Example: `ipocalypse_<name_of_workload>`.
 
+### Example with Options & Specific Dockerfile Directories:
+```bash
+sudo ./ipocalypse -dockerfiles ipocalypse_basic_image,ipocalypse_workload1 -workers 10 -internet
+```
+
 ## Network Configuration
 
 ipocalypse will:
