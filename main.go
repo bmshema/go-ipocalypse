@@ -24,8 +24,7 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, `
 ipocalypse - A tool for testing network behavior by deploying 
-multiple containers with DHCP-assigned IP addresses in a shared 
-network space.
+multiple containers with DHCP-assigned IP addresses to a local network.
 
 Usage:
   sudo ./ipocalypse [options]

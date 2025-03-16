@@ -1,5 +1,5 @@
 # go-ipocalypse
-A tool for testing network behavior by deploying multiple containers with DHCP-assigned IP addresses in a shared network space.
+A tool for testing network behavior by deploying multiple containers with DHCP-assigned IP addresses to a local network.
 
 ## Overview
 
